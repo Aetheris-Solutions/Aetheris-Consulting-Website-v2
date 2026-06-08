@@ -1,0 +1,94 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/legal/privacy-policy",
+      "destination": "/legals/privacy-policy"
+    },
+    {
+      "source": "/en/legals/privacy-policy",
+      "destination": "/legals/privacy-policy"
+    },
+    {
+      "source": "/en/legals/imprint",
+      "destination": "/legals/privacy-policy"
+    },
+    {
+      "source": "/de/legals/datenschutz-",
+      "destination": "/legals/privacy-policy"
+    },
+    {
+      "source": "/de/legals/impressum",
+      "destination": "/legals/privacy-policy"
+    },
+    {
+      "source": "/en/cases/service-factory",
+      "destination": "/en/cases"
+    },
+    {
+      "source": "/en/cases/adspecialist",
+      "destination": "/en/cases"
+    },
+    {
+      "source": "/en/cases/adsventure",
+      "destination": "/en/cases"
+    },
+    {
+      "source": "/en/blog/linkedin-algorithm-2026-what-has-really-changed",
+      "destination": "/en/resources/blog"
+    },
+    {
+      "source": "/en/blog/personal-branding-linkedin-why-you-need-a-narrative",
+      "destination": "/en/resources/blog"
+    },
+    {
+      "source": "/de/manifesto",
+      "destination": "/en/manifesto"
+    },
+    {
+      "source": "/de/services",
+      "destination": "/en/services"
+    },
+    {
+      "source": "/de/cases",
+      "destination": "/en/cases"
+    },
+    {
+      "source": "/de/contact",
+      "destination": "/en/contact"
+    },
+    {
+      "source": "/de/about",
+      "destination": "/en/about"
+    },
+    {
+      "source": "/de/resources/blog",
+      "destination": "/en/resources/blog"
+    },
+    {
+      "source": "/de/resources/growth-assets",
+      "destination": "/en/resources/growth-assets"
+    },
+    {
+      "source": "/de/cases/beilmann-marketing",
+      "destination": "/en/cases/beilmann-marketing"
+    },
+    {
+      "source": "/de/cases/voggsmedia",
+      "destination": "/en/cases/voggsmedia"
+    },
+    {
+      "source": "/de/cases/service-factory",
+      "destination": "/en/cases"
+    },
+    {
+      "source": "/de/cases/adspecialist",
+      "destination": "/en/cases"
+    },
+    {
+      "source": "/de/cases/adsventure",
+      "destination": "/en/cases"
+    }
+  ]
+}
