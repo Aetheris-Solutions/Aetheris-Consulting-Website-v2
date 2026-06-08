@@ -1,6 +1,12 @@
 (function () {
+  // Auto-advance cadence (ms) for the cases gallery.
   var AUTO_SCROLL_DELAY = 4500;
-  var RESUME_AFTER_INTERACTION = 7000;
+  // Transition duration (ms) for each single step. Smooth, not sluggish.
+  var TRANSITION_SPEED = 700;
+  // Swiper's native loop needs enough real slides to wrap without showing an
+  // empty edge. With only a handful of CMS cases the loop glitches, so we
+  // duplicate whole sets up to this minimum before handing it to Swiper.
+  var MIN_SLIDES_FOR_LOOP = 10;
 
   function isCaseGallery(target) {
     return (
@@ -11,11 +17,10 @@
     );
   }
 
-  function originalSlideCount(target) {
-    return Number(target.dataset.aetherisOriginalSlideCount || 0);
-  }
-
-  function prepareLoopBuffer(target) {
+  // Duplicate the original slides (whole sets) until there are enough of them
+  // for Swiper's loop mode to behave. These are REAL slides; Swiper still adds
+  // its own loop clones on top to create the seamless wrap.
+  function ensureEnoughSlides(target) {
     var wrapper = target.querySelector(".swiper-wrapper");
 
     if (!wrapper || target.dataset.aetherisLoopPrepared === "true") return;
@@ -25,149 +30,13 @@
 
     if (!originalCount) return;
 
-    for (var setIndex = 0; setIndex < 2; setIndex += 1) {
+    while (wrapper.children.length < MIN_SLIDES_FOR_LOOP) {
       originalSlides.forEach(function (slide) {
-        var clone = slide.cloneNode(true);
-
-        clone.setAttribute("aria-hidden", "true");
-        clone.dataset.aetherisLoopClone = "true";
-        wrapper.appendChild(clone);
+        wrapper.appendChild(slide.cloneNode(true));
       });
     }
 
-    target.dataset.aetherisOriginalSlideCount = String(originalCount);
     target.dataset.aetherisLoopPrepared = "true";
-  }
-
-  function normalize(swiper, target) {
-    var originalCount = originalSlideCount(target);
-
-    if (!originalCount || !swiper || swiper.destroyed) return;
-
-    if (swiper.activeIndex >= originalCount) {
-      swiper.slideTo(swiper.activeIndex % originalCount, 0, false);
-    }
-  }
-
-  function advance(swiper, target) {
-    if (!swiper || swiper.destroyed || document.hidden) return;
-
-    var speed = swiper.params.speed || 600;
-    var originalCount = originalSlideCount(target);
-
-    if (!originalCount) {
-      swiper.slideNext(speed);
-      return;
-    }
-
-    if (swiper.activeIndex >= originalCount - 1) {
-      swiper.slideTo(originalCount, speed);
-      return;
-    }
-
-    swiper.slideNext(speed);
-  }
-
-  function installAutoScroll(swiper, target) {
-    if (!swiper || !target || target.__aetherisAutoScroll) return;
-
-    var intervalId = null;
-    var resumeTimerId = null;
-
-    function stop() {
-      if (!intervalId) return;
-
-      window.clearInterval(intervalId);
-      intervalId = null;
-    }
-
-    function start() {
-      stop();
-      intervalId = window.setInterval(function () {
-        advance(swiper, target);
-      }, AUTO_SCROLL_DELAY);
-    }
-
-    function pauseThenResume() {
-      stop();
-      window.clearTimeout(resumeTimerId);
-      resumeTimerId = window.setTimeout(start, RESUME_AFTER_INTERACTION);
-    }
-
-    function handleVisibilityChange() {
-      if (document.hidden) {
-        stop();
-      } else {
-        pauseThenResume();
-      }
-    }
-
-    target.addEventListener("mouseenter", stop);
-    target.addEventListener("mouseleave", start);
-    target.addEventListener("focusin", stop);
-    target.addEventListener("focusout", start);
-    target.addEventListener("pointerdown", pauseThenResume);
-    target.addEventListener("touchstart", pauseThenResume, { passive: true });
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    swiper.on("transitionEnd", function () {
-      normalize(swiper, target);
-    });
-
-    swiper.on("sliderMove", pauseThenResume);
-
-    swiper.on("destroy", function () {
-      stop();
-      window.clearTimeout(resumeTimerId);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    });
-
-    target.__aetherisAutoScroll = {
-      start: start,
-      stop: stop
-    };
-
-    installWrappedNavigation(swiper, target, pauseThenResume);
-    start();
-  }
-
-  function installWrappedNavigation(swiper, target, pauseThenResume) {
-    var group = target.closest("[data-swiper-group]");
-    var previousButton = group && group.querySelector("[data-swiper-prev]");
-    var nextButton = group && group.querySelector("[data-swiper-next]");
-
-    function keepEnabled() {
-      [previousButton, nextButton].forEach(function (button) {
-        if (!button) return;
-
-        button.classList.remove("swiper-button-disabled", "swiper-button-lock");
-        button.removeAttribute("disabled");
-        button.setAttribute("aria-disabled", "false");
-      });
-    }
-
-    if (previousButton) {
-      previousButton.addEventListener(
-        "click",
-        function (event) {
-          var originalCount = originalSlideCount(target);
-
-          if (!originalCount || swiper.activeIndex !== 0) return;
-
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          swiper.slideTo(originalCount, 0, false);
-          swiper.slidePrev(swiper.params.speed || 600);
-          pauseThenResume();
-        },
-        true
-      );
-    }
-
-    swiper.on("slideChange", keepEnabled);
-    swiper.on("transitionEnd", keepEnabled);
-    swiper.on("update", keepEnabled);
-    keepEnabled();
   }
 
   function patchSwiper() {
@@ -177,26 +46,31 @@
 
     function AetherisSwiper(element, options) {
       var target = typeof element === "string" ? document.querySelector(element) : element;
-      var shouldPatchCases = isCaseGallery(target);
 
-      if (shouldPatchCases) {
+      if (isCaseGallery(target)) {
+        ensureEnoughSlides(target);
+
         var originalEvents = (options && options.on) || {};
-        prepareLoopBuffer(target);
 
         options = Object.assign({}, options, {
-          loop: false,
+          // Native, genuinely seamless infinite loop — no manual teleport.
+          loop: true,
           rewind: false,
+          // Advance exactly one card per step.
           slidesPerGroup: 1,
-          watchOverflow: false,
-          on: Object.assign({}, originalEvents, {
-            init: function (swiper) {
-              if (typeof originalEvents.init === "function") {
-                originalEvents.init.call(this, swiper);
-              }
-
-              installAutoScroll(swiper, target);
-            }
-          })
+          // Smooth single-step transition.
+          speed: (options && options.speed) || TRANSITION_SPEED,
+          // Extra buffered slides on each side so the wrap never reveals a gap.
+          loopAdditionalSlides: 3,
+          // Step automatically; keep running after the user clicks/drags, and
+          // pause while hovering the gallery.
+          autoplay: {
+            delay: AUTO_SCROLL_DELAY,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+          },
+          // Preserve any init/event hooks the upstream init passed in.
+          on: originalEvents
         });
       }
 
