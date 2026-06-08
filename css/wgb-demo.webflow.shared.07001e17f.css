@@ -2160,7 +2160,7 @@ textarea.w-input, textarea.w-select {
   --color-mode-default--active-state\<deleted\|variable-43f921cb-bd7a-3666-9ac5-0f1d734b1a8f\>: var(--swatch--honeydew\<deleted\|variable-ce750e9f-1666-65be-5b8a-2186b18b3781\>);
   --_paragraphs---paragraph-regular--font-size: 1.125em;
   --_fonts---fonts--alt: Tiro, "Times New Roman", sans-serif;
-  --_colors---swatch--blue: #0028ff;
+  --_colors---swatch--blue: #02205D;
   --_headings---heading-l--line-height: .94em;
   --_paragraphs---paragraph-xl--font: var(--_fonts---fonts--paragraph);
   --_paragraphs---paragraph-xl--font-size: 2em;
@@ -5716,7 +5716,7 @@ figcaption {
 }
 
 .btn-icon-icon__bg.is-white {
-  background-color: #0028ff26;
+  background-color: #02205D26;
 }
 
 .btn-icon-content__bg {
@@ -5737,7 +5737,7 @@ figcaption {
 
 .btn-icon-content__bg.is-white {
   background-color: #fff5ef1a;
-  background-image: linear-gradient(180deg, var(--_colors---swatch--white), #0028ff33);
+  background-image: linear-gradient(180deg, var(--_colors---swatch--white), #02205D33);
 }
 
 .btn-icon-content__bg.is-outline {
@@ -8984,7 +8984,7 @@ figcaption {
   animation: 2.8s ease-in-out infinite orbitPulse;
   position: relative;
   transform: rotate(45.56deg);
-  box-shadow: 0 0 18px 6px #0028ff, inset 0 0 18px 6px #0028ff;
+  box-shadow: 0 0 18px 6px #02205D, inset 0 0 18px 6px #02205D;
 }
 
 .orbit-about-css {
